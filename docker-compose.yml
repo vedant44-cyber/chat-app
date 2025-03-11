@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3'
 
 services:
   postgres:
@@ -16,27 +16,36 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    environment:
-      - DB_HOST=postgres
-      - DB_USER=chatapp
-      - DB_PASSWORD=chatapp123
-      - DB_NAME=chatapp
-      - PORT=50051
     ports:
-      - "50051:50051"
-    depends_on:
-      - postgres
+      - "9090:9090"
+    networks:
+      - chat_network
+
+  envoy:
+    image: envoyproxy/envoy:v1.28-latest
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "8080:8080"
+      - "9901:9901"
+    networks:
+      - chat_network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_BACKEND_URL=http://localhost:50051
+      - "5173:5173"
+    networks:
+      - chat_network
     depends_on:
       - backend
+      - envoy
 
 volumes:
-  postgres_data: 
+  postgres_data:
+
+networks:
+  chat_network:
+    driver: bridge 

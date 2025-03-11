@@ -3,47 +3,74 @@ syntax = "proto3";
 package chat;
 option go_package = "chat-app/proto";
 
+// ChatService defines the gRPC service for the real-time chat application
 service ChatService {
-  // Authentication
+  // Authentication endpoints
   rpc Register(RegisterRequest) returns (AuthResponse) {}
   rpc Login(LoginRequest) returns (AuthResponse) {}
   
   // Chat operations
   rpc SendMessage(Message) returns (MessageResponse) {}
-  rpc JoinChat(JoinRequest) returns (stream Message) {}
+  
+  // JoinChat establishes a server-streaming connection for receiving messages
+  rpc JoinChat(JoinRequest) returns (stream ChatUpdate) {}
 }
 
 message RegisterRequest {
-  string username = 1;
-  string password = 2;
-  string email = 3;
+  string username = 1;  // Required: Username for registration
+  string password = 2;  // Required: Password for the account
+  string email = 3;     // Required: Email address for the account
 }
 
 message LoginRequest {
-  string username = 1;
-  string password = 2;
+  string username = 1;  // Required: Username for login
+  string password = 2;  // Required: Password for authentication
 }
 
 message AuthResponse {
-  bool success = 1;
-  string token = 2;
-  string error = 3;
+  bool success = 1;           // Indicates if the operation was successful
+  string token = 2;          // JWT token for authenticated sessions
+  string error = 3;          // Error message if success is false
+  string user_id = 4;        // User ID of the authenticated user
+  string username = 5;       // Username of the authenticated user
 }
 
 message Message {
-  string id = 1;
-  string from_user = 2;
-  string content = 3;
-  int64 timestamp = 4;
+  string id = 1;             // Unique message identifier
+  string from_user = 2;      // Username of the sender
+  string content = 3;        // Message content
+  int64 timestamp = 4;       // Unix timestamp of when the message was sent
+  MessageType type = 5;      // Type of message
+}
+
+enum MessageType {
+  TEXT = 0;                  // Regular text message
+  SYSTEM = 1;               // System notification
+  USER_JOIN = 2;            // User joined notification
+  USER_LEAVE = 3;           // User left notification
 }
 
 message MessageResponse {
-  bool success = 1;
-  string error = 2;
-  Message message = 3;
+  bool success = 1;          // Indicates if the message was sent successfully
+  string error = 2;         // Error message if success is false
+  Message message = 3;      // The sent message with server-assigned fields
 }
 
 message JoinRequest {
-  string user_id = 1;
-  string token = 2;
+  string user_id = 1;       // User ID from authentication
+  string token = 2;         // JWT token for authentication
+}
+
+message ChatUpdate {
+  oneof update {
+    Message message = 1;                // New chat message
+    UserStatusUpdate status_update = 2; // User status change
+  }
+}
+
+message UserStatusUpdate {
+  string user_id = 1;       // ID of the user whose status changed
+  string username = 2;      // Username of the user
+  bool online = 3;          // Whether the user is online
+  int64 timestamp = 4;      // When the status changed
 } 

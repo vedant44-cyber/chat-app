@@ -1,18 +1,15 @@
 import { Navigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuthStore();
+export function PrivateRoute({ children }: PrivateRouteProps) {
+  const token = localStorage.getItem('token');
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (!token) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
-};
-
-export default PrivateRoute; 
+} 

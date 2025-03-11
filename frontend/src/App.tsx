@@ -1,19 +1,16 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
+import { ThemeProvider, createTheme } from '@mui/material';
+import { Auth } from './components/Auth';
+import { Chat } from './components/Chat';
+import { PrivateRoute } from './components/PrivateRoute';
 import { theme } from './theme';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Chat from './pages/Chat';
-import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Auth />} />
           <Route
             path="/chat"
             element={
@@ -22,7 +19,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/chat" replace />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
     </ThemeProvider>
