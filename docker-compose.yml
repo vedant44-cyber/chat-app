@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: chatapp
+      POSTGRES_PASSWORD: chatapp123
+      POSTGRES_DB: chatapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=chatapp
+      - DB_PASSWORD=chatapp123
+      - DB_NAME=chatapp
+      - PORT=50051
+    ports:
+      - "50051:50051"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:50051
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data: 
